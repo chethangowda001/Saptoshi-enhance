@@ -1,0 +1,67 @@
+.bidder-details-container {
+    max-width: 85%;
+    margin: 100px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #eceacc;
+  }
+  
+  .details{
+    font-size: larger;
+    margin-top: -50px;
+    display: flex;
+    flex-direction: row;
+  }
+
+ h3 {
+    color: #101010;
+    font-weight: bolder;
+  }
+  
+  div {
+    margin-bottom: 10px;
+  }
+
+  #photo{
+    width: 125px;
+    height: 125px;
+    border: 2px solid black;
+    margin: 20px 50px;
+  }
+  
+  strong {
+    font-weight: bold;
+  }
+  .ongoing-bids-container {
+    margin-top: 20px;
+  }
+  
+  .ongoing-bids-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .ongoing-bids-table th,
+  .ongoing-bids-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+  }
+  
+  .ongoing-bids-table th {
+    background-color: #d0ca74; /* Light golden/yellow */
+    color: #000000; /* Dark blue */
+  }
+  
+  .ongoing-bids-table tr:nth-child(even) {
+    background-color: #f5f5f5;
+  }
+  
+  .ongoing-bids-table tr:hover {
+    background-color: #e0e0e0;
+  }
+/* Add more styling as needed */
+  

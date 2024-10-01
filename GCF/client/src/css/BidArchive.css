@@ -1,0 +1,48 @@
+.bid-archive-container {
+  max-width: 95%;
+  margin: auto;
+  padding: 20px;
+}
+
+.bid-archive-container h3 {
+  color: white; /* Set the color of the h3 element to white */
+}
+
+h3 {
+  color: #333;
+}
+.search{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.table-container {
+  overflow-x: auto;
+}
+
+.archive-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.archive-table th, .archive-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.archive-table th {
+  text-align: center;
+  background-color: #ffd700; /* Light golden/yellow */
+  color: #292c33; /* Dark blue */
+}
+
+.archive-table tr:nth-child(even) {
+  background-color: #f5f5f5;
+}
+
+.archive-table tr:hover {
+  background-color: #e0e0e0;
+}

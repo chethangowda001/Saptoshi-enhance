@@ -1,0 +1,48 @@
+.profit-loss-container {
+  max-width: 95%;
+  margin: auto;
+  padding: 20px;
+}
+
+.profit-loss-container h3 {
+  color: white; /* Set the color of the h3 element to white */
+}
+
+h3 {
+  color: #333;
+}
+
+.profit-loss-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.profit-loss-table th,
+.profit-loss-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.profit-loss-table th {
+  text-align: center;
+  background-color: #ade465; /* Light golden/yellow */
+  color: #1c1e22; /* Dark blue */
+}
+
+/* Remove alternating row colors */
+.profit-loss-table tr {
+  background-color: #fff; /* Set all rows to white */
+}
+
+/* Optional: Remove hover effect if needed */
+.profit-loss-table tr:hover {
+  background-color: #fff; /* Keep hover background white */
+}
+
+.summary {
+  background-color: #cae8a2;
+  margin-top: 20px;
+  font-weight: bold;
+}

@@ -1,0 +1,172 @@
+/* ParticipantDetails.css */
+
+/* Container Style */
+.container {
+    padding: 2rem;
+    background-color: #f8f9fa;
+}
+
+/* Card Style */
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Header Style */
+.card-header {
+    background-color: #007bff;
+    color: #ffffff;
+    border-radius: 10px 10px 0 0;
+    padding: 1rem;
+}
+
+/* Card Body Style */
+.card-body {
+    padding: 2rem;
+}
+
+/* Participant Image Style */
+.card-body img {
+    border-radius: 10px;
+    border: 2px solid #007bff;
+}
+
+/* Heading Styles */
+h2, h4 {
+    color: #343a40;
+}
+
+h4 {
+    margin-top: 0.5rem;
+}
+
+/* Paragraph Styles */
+p {
+    color: #495057;
+    font-size: 1rem;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+
+    .card-body img {
+        width: 100%; /* Full width on smaller screens */
+        height: auto; /* Maintain aspect ratio */
+    }
+}
+/* ParticipantDetails.css */
+
+/* Container Style */
+.container {
+    padding: 2rem;
+    background-color: #f8f9fa;
+}
+
+/* Card Style */
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Header Style */
+.card-header {
+    background-color: #007bff;
+    color: #ffffff;
+    border-radius: 10px 10px 0 0;
+    padding: 1rem;
+}
+
+/* Card Body Style */
+.card-body {
+    padding: 2rem;
+}
+
+/* Participant Image Style */
+.card-body img {
+    border-radius: 10px;
+    border: 2px solid #007bff;
+}
+
+/* Heading Styles */
+h2, h4 {
+    color: #343a40;
+}
+
+h4 {
+    margin-top: 0.5rem;
+}
+
+/* Paragraph Styles */
+p {
+    color: #495057;
+    font-size: 1rem;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+
+    .card-body img {
+        width: 100%; /* Full width on smaller screens */
+        height: auto; /* Maintain aspect ratio */
+    }
+}
