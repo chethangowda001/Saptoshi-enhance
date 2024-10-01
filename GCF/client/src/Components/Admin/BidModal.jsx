@@ -13,7 +13,10 @@ const BidModal = ({ show, onClose, bidData, nearestBid, onBidStart }) => {
 
   useEffect(() => {
     setCurrentNearestBid(nearestBid); // Update currentNearestBid whenever nearestBid changes
-  }, [nearestBid]);
+    setWinnerId(''); // Reset winner selection when modal opens
+    setBidValue(''); // Reset bid value when modal opens
+    setError(null); // Clear previous errors
+  }, [nearestBid, show]);
 
   const handleWinnerChange = (e) => {
     setWinnerId(e.target.value);
@@ -78,6 +81,7 @@ const BidModal = ({ show, onClose, bidData, nearestBid, onBidStart }) => {
     };
 
     try {
+      console.log(`Submitting start bid for Bid No.: ${updatedBid.BidNo}`);
       // First API call: Update the bid details
       const response = await axios.put(
         `http://localhost:3001/bids/${bidData._id}/update-bid/${currentNearestBid.BidNo}`,
@@ -134,27 +138,26 @@ const BidModal = ({ show, onClose, bidData, nearestBid, onBidStart }) => {
   }
 
   return (
-    <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog">
-      <div className="modal-dialog" role="document">
+    <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog" aria-modal="true">
+      <div className="modal-dialog modal-dialog-centered" role="document">
         <div className="modal-content">
           {error && (
-            <div className="alert alert-danger" role="alert">
+            <div className="alert alert-danger m-3" role="alert">
               {error}
             </div>
           )}
           <div className="modal-header">
             <h5 className="modal-title">Start Bid</h5>
-            <button type="button" className="close" onClick={onClose} aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
+            <button type="button" className="btn-close" onClick={onClose} aria-label="Close"></button>
           </div>
           <form onSubmit={handleSubmit}>
             <div className="modal-body">
-              <div className="form-group">
-                <label htmlFor="bidWinner">Bid Winner</label>
+              {/* Bid Winner Selection */}
+              <div className="mb-3">
+                <label htmlFor="bidWinner" className="form-label"><strong>Bid Winner</strong></label>
                 <select
                   id="bidWinner"
-                  className="form-control"
+                  className="form-select"
                   value={winnerId}
                   onChange={handleWinnerChange}
                   required
@@ -167,8 +170,9 @@ const BidModal = ({ show, onClose, bidData, nearestBid, onBidStart }) => {
                   ))}
                 </select>
               </div>
-              <div className="form-group">
-                <label htmlFor="bidValue">Bid Value</label>
+              {/* Bid Value Input */}
+              <div className="mb-3">
+                <label htmlFor="bidValue" className="form-label"><strong>Bid Value</strong></label>
                 <input
                   type="number"
                   id="bidValue"
@@ -187,7 +191,14 @@ const BidModal = ({ show, onClose, bidData, nearestBid, onBidStart }) => {
                 Cancel
               </button>
               <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : 'Start Bid'}
+                {isSubmitting ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Submitting...
+                  </>
+                ) : (
+                  'Start Bid'
+                )}
               </button>
             </div>
           </form>

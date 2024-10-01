@@ -20,7 +20,9 @@ const BidPage = () => {
   // Memoize fetchBidData to prevent unnecessary re-renders
   const fetchBidData = useCallback(async () => {
     try {
+      console.log(`Fetching bid data for ID: ${id}`);
       const response = await axios.get(`http://localhost:3001/bids/${id}`);
+      console.log('Bid data fetched successfully:', response.data);
       setBidData(response.data);
       const nearest = getNearestBidNo(response.data.Bids);
       setNearestBid(nearest);
@@ -53,7 +55,9 @@ const BidPage = () => {
     }
 
     try {
+      console.log(`Searching participants with term: ${searchTerm}`);
       const response = await axios.get(`http://localhost:3001/participants?search=${searchTerm}`);
+      console.log('Search results:', response.data);
       setSearchResults(response.data);
       setShowSearch(true); // Show search results after fetching
       setError(null); // Clear any previous errors
@@ -66,13 +70,16 @@ const BidPage = () => {
   const handleAddUser = async (user) => {
     try {
       const { userName, userPhoneNo } = user;
+      console.log(`Adding user: ${userName}, Phone: ${userPhoneNo} to bid ID: ${id}`);
 
       // Add user to the bid via backend
       const response = await axios.post(`http://localhost:3001/bids/${id}/add-user`, { userName, userPhoneNo });
 
+      console.log('Add user response:', response);
+
       if (response.status === 201) {
         alert(response.data.message);
-      } else {
+      } else if (response.status === 200) {
         // Update bidData with the response
         setBidData(response.data);
         setSearchResults([]);
@@ -80,6 +87,8 @@ const BidPage = () => {
         setShowSearch(false);
         // Show success alert
         alert('User added successfully!');
+      } else {
+        alert('Unexpected response while adding user.');
       }
       setError(null); // Clear any previous errors
     } catch (error) {
@@ -101,15 +110,25 @@ const BidPage = () => {
         nearestDiff = diff;
       }
     }
+    console.log('Nearest bid:', nearestBid);
     return nearestBid;
   };
 
   const handleBidStart = async (updatedBid) => {
     try {
+      if (!nearestBid || !nearestBid.BidNo) {
+        throw new Error('Nearest bid or BidNo is undefined.');
+      }
+  
+      const bidNo = nearestBid.BidNo;
+      console.log(`Starting bid No.: ${bidNo} for bid ID: ${bidData._id}`);
+  
       const response = await axios.put(
-        `http://localhost:3001/bids/${bidData._id}/update-bid/${updatedBid.BidNo}`,
+        `http://localhost:3001/bids/${bidData._id}/update-bid/${bidNo}`,
         updatedBid
       );
+      console.log('Start bid response:', response);
+  
       if (response.status === 200) {
         await fetchBidData();
         alert('Bid started successfully!');
@@ -119,8 +138,10 @@ const BidPage = () => {
     } catch (error) {
       console.error('Error starting bid:', error);
       setError('Failed to start bid.');
+      alert('Failed to start bid.');
     }
   };
+  
 
   const handleCloseBid = async () => {
     if (!nearestBid) {
@@ -132,6 +153,7 @@ const BidPage = () => {
     let totalDebit = nearestBid.BidPayOut || 0;
 
     try {
+      console.log(`Closing bid No.: ${nearestBid.BidNo} for bid ID: ${bidData._id}`);
       // Iterate over the users in bidData
       for (const user of bidData.users) {
         // Find the corresponding bid in Bids array by BidNo
@@ -154,6 +176,7 @@ const BidPage = () => {
             bidDate: nearestBid.BidDate,
           };
 
+          console.log(`Updating payment due for user: ${user.userName}`);
           // Make POST API call to update paymentDue collection
           await axios.post('http://localhost:3001/update-payment-due', requestData);
           console.log(`Payment due updated for user ${user.userName}:`, requestData);
@@ -168,9 +191,10 @@ const BidPage = () => {
         bidNo: nearestBid.BidNo,
       };
 
+      console.log('Closing bid with data:', requestData);
       // Make API call to update bid data
       const response = await axios.put(`http://localhost:3001/bids/${bidData._id}/close-bid/${nearestBid.BidNo}`, requestData);
-      console.log('Bid closed successfully:', response.data);
+      console.log('Close bid response:', response.data);
       setBidClosed(true);
       await fetchBidData();
       alert('Bid closed successfully!');
@@ -178,6 +202,7 @@ const BidPage = () => {
     } catch (error) {
       console.error('Error closing bid:', error);
       setError('Failed to close bid.');
+      alert('Failed to close bid.');
     }
   };
 
@@ -217,6 +242,7 @@ const BidPage = () => {
     const currentPayedStatus = paymentStatus ? paymentStatus.payed : false;
 
     try {
+      console.log(`Toggling payment status for user ID: ${userId} in bid No.: ${nearestBid.BidNo}`);
       await axios.put(`http://localhost:3001/bids/${id}/users/${userId}/payment`, {
         bidNo: nearestBid.BidNo,
         payed: !currentPayedStatus,
@@ -228,21 +254,26 @@ const BidPage = () => {
     } catch (error) {
       console.error('Error updating payment status:', error);
       setError('Failed to update payment status.');
+      alert('Failed to update payment status.');
     }
   };
 
   if (error) {
     return (
       <div className="container mt-4">
-        <p className="text-danger">{error}</p>
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
       </div>
     );
   }
 
   if (!bidData) {
     return (
-      <div className="container mt-4">
-        <p>Loading...</p>
+      <div className="container mt-4 text-center">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
       </div>
     );
   }
@@ -251,14 +282,16 @@ const BidPage = () => {
 
   return (
     <div className="container">
+      {/* Bid Details Section */}
       <div>
         <h3 className="my-4">Bid Details</h3>
         <div className="row">
+          {/* Left Column */}
           <div className="col-md-6">
-            <div className="card mb-4 h-100">
-              <div className="card-body d-flex flex-column">
-                <p><strong>Bid Id:</strong> {bidData._id}</p>
-                <p><strong>Amount of Gold:</strong> {bidData.BidSize}gms</p>
+            <div className="card mb-4 shadow-sm">
+              <div className="card-body">
+                <p><strong>Bid ID:</strong> {bidData._id}</p>
+                <p><strong>Amount of Gold:</strong> {bidData.BidSize} gms</p>
                 <p><strong>Number of Participants:</strong> {bidData.ParticipantsCount}</p>
                 <p><strong>Number of Bids:</strong> {bidData.MonthDuration}</p>
                 <p><strong>Start Date:</strong> {formatDate(bidData.StartDate)}</p>
@@ -266,16 +299,17 @@ const BidPage = () => {
               </div>
             </div>
           </div>
+          {/* Right Column */}
           <div className="col-md-6">
-            <div className="card mb-4 h-100">
-              <div className="card-body d-flex flex-column">
+            <div className="card mb-4 shadow-sm">
+              <div className="card-body">
                 <p><strong>Bid Round:</strong> {nearestBid ? nearestBid.BidNo : '-'}</p>
                 <p><strong>Bid Date:</strong> {nearestBid ? formatDate(nearestBid.BidDate) : '-'}</p>
                 <p><strong>Bid Winner:</strong> {nearestBid && nearestBid.BidWinner ? nearestBid.BidWinner.userName : '-'}</p>
                 <p><strong>Bid Value:</strong> {nearestBid ? nearestBid.BidValue : '-'}</p>
-                <div className="mt-auto">
+                <div className="mt-3 d-flex justify-content-end">
                   <button
-                    className="btn btn-success me-4"
+                    className="btn btn-success me-3"
                     onClick={() => setShowBidModal(true)}
                     disabled={nearestBid && nearestBid.BidStart}
                   >
@@ -299,27 +333,26 @@ const BidPage = () => {
       <div className="mt-4">
         <h5>Participants:</h5>
         <div className="table-responsive">
-          <table className="table table-bordered table-fixed">
-            <thead className="thead-light">
+          <table className="table table-bordered table-hover">
+            <thead className="table-light">
               <tr>
-                <th scope="col">Sl. No</th>
-                <th scope="col">User</th>
-                <th scope="col">Bid No</th>
-                <th scope="col">Bid (value)</th>
-                <th scope="col">P/O</th>
+                <th>Sl. No</th>
+                <th>User</th>
+                <th>Bid No</th>
+                <th>Bid (Value)</th>
+                <th>P/O</th>
                 {[...Array(bidData.MonthDuration)].map((_, index) => (
                   <th
-                    scope="col"
                     key={index + 1}
                     style={{
-                      backgroundColor: isColumnEditable(index) ? 'green' : '#4E89E1',
-                      color: isColumnEditable(index) ? 'white' : 'inherit'
+                      backgroundColor: isColumnEditable(index) ? '#28a745' : '#007bff',
+                      color: 'white',
                     }}
                   >
                     {index + 1}
                   </th>
                 ))}
-                <th scope="col">Paid</th>
+                <th>Paid</th>
               </tr>
             </thead>
             <tbody>
@@ -339,17 +372,19 @@ const BidPage = () => {
                         </td>
                       ))}
                       <td>
-                        <input
-                          type="checkbox"
-                          className="form-check-input"
-                          checked={paymentInfo.payed}
-                          onChange={() => handlePaymentToggle(user._id)}
-                          disabled={!nearestBid || nearestBid.BidClose}
-                          id={`payment-checkbox-${user._id}`}
-                        />
-                        <label htmlFor={`payment-checkbox-${user._id}`} className="form-check-label">
-                          {paymentInfo.payed ? 'Paid' : 'Unpaid'}
-                        </label>
+                        <div className="form-check">
+                          <input
+                            type="checkbox"
+                            className="form-check-input"
+                            checked={paymentInfo.payed}
+                            onChange={() => handlePaymentToggle(user._id)}
+                            disabled={!nearestBid || nearestBid.BidClose}
+                            id={`payment-checkbox-${user._id}`}
+                          />
+                          <label htmlFor={`payment-checkbox-${user._id}`} className="form-check-label">
+                            {paymentInfo.payed ? 'Paid' : 'Unpaid'}
+                          </label>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -381,11 +416,9 @@ const BidPage = () => {
               value={searchTerm}
               onChange={handleInputChange}
             />
-            <div className="input-group-append">
-              <button className="btn btn-outline-success" type="button" onClick={handleSearch}>
-                Search
-              </button>
-            </div>
+            <button className="btn btn-outline-success" type="button" onClick={handleSearch}>
+              Search
+            </button>
           </div>
 
           {searchResults.length > 0 && (
@@ -412,43 +445,44 @@ const BidPage = () => {
       {/* Bid Management Account */}
       <div className="mt-4">
         <h5>Bid Management Account:</h5>
-        <table className="table table-bordered">
-          <thead className="thead-light">
-            <tr>
-              <th scope="col">Sl. No</th>
-              <th scope="col">Account</th>
-              {[...Array(bidData.MonthDuration)].map((_, index) => (
-                <th scope="col" key={index + 1}>{index + 1}</th>
-              ))}
-              <th scope="col">Net</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>Management Credit</td>
-              {bidData.BidManagementAccount.map((account, index) => (
-                <td key={index}>{account.ManagementCredit}</td>
-              ))}
-              <td>
-                {bidData.BidManagementAccount.reduce((total, account) => total + account.ManagementCredit, 0)}
-              </td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Management Debit</td>
-              {bidData.BidManagementAccount.map((account, index) => (
-                <td key={index}>{account.ManagementDebit}</td>
-              ))}
-              <td>
-                {bidData.BidManagementAccount.reduce((total, account) => total + account.ManagementDebit, 0)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="table-responsive">
+          <table className="table table-bordered">
+            <thead className="table-light">
+              <tr>
+                <th>Sl. No</th>
+                <th>Account</th>
+                {[...Array(bidData.MonthDuration)].map((_, index) => (
+                  <th key={index + 1}>{index + 1}</th>
+                ))}
+                <th>Net</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Management Credit</td>
+                {bidData.BidManagementAccount.map((account, index) => (
+                  <td key={index}>{account.ManagementCredit}</td>
+                ))}
+                <td>
+                  {bidData.BidManagementAccount.reduce((total, account) => total + account.ManagementCredit, 0)}
+                </td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Management Debit</td>
+                {bidData.BidManagementAccount.map((account, index) => (
+                  <td key={index}>{account.ManagementDebit}</td>
+                ))}
+                <td>
+                  {bidData.BidManagementAccount.reduce((total, account) => total + account.ManagementDebit, 0)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-  
       {/* Bid Modal */}
       <BidModal
         show={showBidModal}

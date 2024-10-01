@@ -1,92 +1,17 @@
-.bid-page-container {
-  max-width: 95%;
-  margin: auto;
-  padding: 20px;
-}
+/* src/css/BidPage.css */
 
-h3 {
-  text-decoration: underline;
-  color: #000000;
-}
-
-.table-container {
-  overflow-x: auto;
-}
-
-.bid-table {
-  width: 100%;
-  border-collapse: collapse;
+.ongoing-bids-container {
   margin-top: 20px;
-}
-
-.bid-table th,
-.bid-table td {
-  border: 1px solid #ddd;
-  padding: 12px;
-  text-align: left;
-}
-
-.bid-table th {
-  text-align: center;
-  background-color: #3fc861; /* Light golden/yellow */
-  color: #27292e; /* Dark blue */
-}
-
-.bid-table tr:nth-child(even) {
-  background-color: #f5f5f5;
-}
-
-.bid-table tr:hover {
-  background-color: #e0e0e0;
-}
-
-.summary-table {
-  margin-top: 20px;
-}
-
-.summary {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.summary th,
-.summary td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
-  background-color: #7edd87; /* Light golden/yellow */
-  color: #222429; /* Dark blue */
-}
-
-.summary tr:nth-child(even) {
-  background-color: #f5f5f5;
-}
-
-.summary tr:hover {
-  background-color: #e0e0e0;
 }
 
 .table-fixed {
-  width: 100%;
   table-layout: fixed;
 }
 
-.table-fixed thead th,
-.table-fixed tbody td {
-  width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.table-fixed th, .table-fixed td {
+  word-wrap: break-word;
 }
 
-.input-fixed {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.check-input{
-  width: 100%;
-  margin: 0;
+.form-check-label {
+  cursor: pointer;
 }

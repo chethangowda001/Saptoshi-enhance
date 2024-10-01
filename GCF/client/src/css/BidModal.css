@@ -1,0 +1,19 @@
+/* src/css/BidModal.css */
+
+.modal-backdrop {
+    opacity: 0.5 !important;
+  }
+  
+  .modal-content {
+    border-radius: 10px;
+  }
+  
+  .btn-close {
+    background: transparent;
+    border: none;
+  }
+  
+  .alert {
+    border-radius: 5px;
+  }
+  
