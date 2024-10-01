@@ -1,9 +1,13 @@
+// src/Components/Admin/BidPage.js
+
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
+import { useParams } from 'react-router-dom';
 import BidModal from './BidModal';
-import "../../css/BidPage.css"
+import "../../css/BidPage.css";
 
-const BidPage = ({ activeBidId }) => {
+const BidPage = () => {
+  const { id } = useParams(); // Retrieve bidId from URL
   const [bidData, setBidData] = useState(null);
   const [nearestBid, setNearestBid] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
@@ -12,8 +16,6 @@ const BidPage = ({ activeBidId }) => {
   const [showBidModal, setShowBidModal] = useState(false);
   const [bidClosed, setBidClosed] = useState(true);
   const [error, setError] = useState(null); // To handle errors
-
-  const id = activeBidId;
 
   // Memoize fetchBidData to prevent unnecessary re-renders
   const fetchBidData = useCallback(async () => {
@@ -230,11 +232,19 @@ const BidPage = ({ activeBidId }) => {
   };
 
   if (error) {
-    return <div className="container mt-4"><p className="text-danger">{error}</p></div>;
+    return (
+      <div className="container mt-4">
+        <p className="text-danger">{error}</p>
+      </div>
+    );
   }
 
   if (!bidData) {
-    return <div className="container mt-4">Loading...</div>;
+    return (
+      <div className="container mt-4">
+        <p>Loading...</p>
+      </div>
+    );
   }
 
   const sortedUsers = sortUsersByBidNo(bidData.users);
@@ -288,62 +298,72 @@ const BidPage = ({ activeBidId }) => {
       {/* Participants Table */}
       <div className="mt-4">
         <h5>Participants:</h5>
-        <table className="table table-bordered table-fixed">
-          <thead className="thead-light">
-            <tr>
-              <th scope="col">Sl. No</th>
-              <th scope="col">User</th>
-              <th scope="col">Bid No</th>
-              <th scope="col">Bid (value)</th>
-              <th scope="col">P/O</th>
-              {[...Array(bidData.MonthDuration)].map((_, index) => (
-                <th
-                  scope="col"
-                  key={index + 1}
-                  style={{
-                    backgroundColor: isColumnEditable(index) ? 'green' : '#4E89E1',
-                    color: isColumnEditable(index) ? 'white' : 'inherit'
-                  }}
-                >
-                  {index + 1}
-                </th>
-              ))}
-              <th scope="col">Paid</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedUsers.length > 0 && sortedUsers.map((user, index) => {
-              const paymentInfo = nearestBid ? getPaymentStatus(user._id, nearestBid.BidNo) : { payment: '-', payed: false };
-              return (
-                <tr key={user._id}>
-                  <td>{index + 1}</td>
-                  <td>{user.userName}</td>
-                  <td>{user.BidWinNo || '-'}</td>
-                  <td>{user.BidValue || '-'}</td>
-                  <td>{user.BidPayOut || '-'}</td>
-                  {[...Array(bidData.MonthDuration)].map((_, monthIndex) => (
-                    <td key={monthIndex + 1}>
-                      {bidData.Bids[monthIndex] && bidData.Bids[monthIndex].PaymentStatus.find(status => status.u_id === user._id)?.payment || '-'}
-                    </td>
-                  ))}
-                  <td>
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      checked={paymentInfo.payed}
-                      onChange={() => handlePaymentToggle(user._id)}
-                      disabled={!nearestBid || nearestBid.BidClose}
-                      id={`payment-checkbox-${user._id}`}
-                    />
-                    <label htmlFor={`payment-checkbox-${user._id}`} className="form-check-label">
-                      {paymentInfo.payed ? 'Paid' : 'Unpaid'}
-                    </label>
+        <div className="table-responsive">
+          <table className="table table-bordered table-fixed">
+            <thead className="thead-light">
+              <tr>
+                <th scope="col">Sl. No</th>
+                <th scope="col">User</th>
+                <th scope="col">Bid No</th>
+                <th scope="col">Bid (value)</th>
+                <th scope="col">P/O</th>
+                {[...Array(bidData.MonthDuration)].map((_, index) => (
+                  <th
+                    scope="col"
+                    key={index + 1}
+                    style={{
+                      backgroundColor: isColumnEditable(index) ? 'green' : '#4E89E1',
+                      color: isColumnEditable(index) ? 'white' : 'inherit'
+                    }}
+                  >
+                    {index + 1}
+                  </th>
+                ))}
+                <th scope="col">Paid</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedUsers.length > 0 ? (
+                sortedUsers.map((user, index) => {
+                  const paymentInfo = nearestBid ? getPaymentStatus(user._id, nearestBid.BidNo) : { payment: '-', payed: false };
+                  return (
+                    <tr key={user._id}>
+                      <td>{index + 1}</td>
+                      <td>{user.userName}</td>
+                      <td>{user.BidWinNo || '-'}</td>
+                      <td>{user.BidValue || '-'}</td>
+                      <td>{user.BidPayOut || '-'}</td>
+                      {[...Array(bidData.MonthDuration)].map((_, monthIndex) => (
+                        <td key={monthIndex + 1}>
+                          {bidData.Bids[monthIndex] && bidData.Bids[monthIndex].PaymentStatus.find(status => status.u_id === user._id)?.payment || '-'}
+                        </td>
+                      ))}
+                      <td>
+                        <input
+                          type="checkbox"
+                          className="form-check-input"
+                          checked={paymentInfo.payed}
+                          onChange={() => handlePaymentToggle(user._id)}
+                          disabled={!nearestBid || nearestBid.BidClose}
+                          id={`payment-checkbox-${user._id}`}
+                        />
+                        <label htmlFor={`payment-checkbox-${user._id}`} className="form-check-label">
+                          {paymentInfo.payed ? 'Paid' : 'Unpaid'}
+                        </label>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="8" className="text-center">
+                    No ongoing bids found.
                   </td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Search and Add User */}
@@ -428,6 +448,7 @@ const BidPage = ({ activeBidId }) => {
         </table>
       </div>
 
+  
       {/* Bid Modal */}
       <BidModal
         show={showBidModal}

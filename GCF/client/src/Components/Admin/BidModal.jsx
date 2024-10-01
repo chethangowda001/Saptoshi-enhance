@@ -1,6 +1,8 @@
+// src/Components/Admin/BidModal.js
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import "../../css/BidModal.css"
+import "../../css/BidModal.css";
 
 const BidModal = ({ show, onClose, bidData, nearestBid, onBidStart }) => {
   const [winnerId, setWinnerId] = useState('');

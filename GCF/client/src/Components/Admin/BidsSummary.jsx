@@ -69,7 +69,7 @@ const BidsSummary = () => {
 
   return (
     <div style={{ padding: '20px' }}>
-      <Link to="/bids" style={{ textDecoration: 'none' }}>
+      <Link to="/dashboard/bidarchive" style={{ textDecoration: 'none' }}>
         <Button variant="outlined" startIcon={<ArrowBackIcon />} sx={{ marginBottom: '20px' }}>
           Back to Bids Archive
         </Button>

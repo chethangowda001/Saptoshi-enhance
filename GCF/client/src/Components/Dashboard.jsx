@@ -27,7 +27,7 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SummarizeIcon from '@mui/icons-material/Summarize'; // Correct Icon Import
+import SummarizeIcon from '@mui/icons-material/Summarize';
 
 // Import your admin components
 import OngoingBids from './Admin/OngoingBids';
@@ -40,7 +40,8 @@ import NewBid from './Admin/NewBid';
 import BidPage from './Admin/BidPage';
 import AddUser from './Admin/AddUser';
 import RegisteredUsers from './Admin/RegisteredUsers';
-// import ProfitSummary from './Admin/ProfitSummary'; // Assuming you have this component
+// import ProfitSummary from './Admin/ProfitSummary'; // Uncomment if needed
+import PaymentStatus from './Admin/PaymentStatus'; // Assuming you have this component
 
 const drawerWidth = 240;
 
@@ -117,6 +118,7 @@ const Dashboard = () => {
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
+          backgroundColor: '#1976d2', // Customize as needed
         }}
       >
         <Toolbar>
@@ -181,7 +183,7 @@ const Dashboard = () => {
           <Route path="adduser" element={<AddUser />} />
           {/* <Route path="profitsummary" element={<ProfitSummary />} />  */}
           <Route path="bid/:id" element={<BidPage />} />
-          {/* Add more nested routes as needed */}
+          <Route path="payment-status/:id" element={<PaymentStatus />} /> {/* Ensure PaymentStatus is defined */}
 
           {/* Catch-all for undefined nested routes */}
           <Route path="*" element={<Navigate to="ongoingbids" replace />} />
