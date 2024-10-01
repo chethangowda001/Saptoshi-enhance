@@ -1,133 +1,194 @@
-import React, { useState } from 'react';
-import { Route, Routes, useNavigate } from 'react-router-dom';
-import "../css/Dashboard.css";
-import OngoingBids from "./Admin/OngoingBids";
-import BidArchive from "./Admin/BidArchive";
-import BidParticipants from "./Admin/BidParticipants";
-import Payments from "./Admin/Payments";
-import Register from "./Admin/Register";
-import ProfitLoss from "./Admin/ProfitLoss";
-import NewBid from "./Admin/NewBid";
+// src/Components/Dashboard.js
+
+import React from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  AppBar,
+  Typography,
+  CssBaseline,
+  Box,
+  IconButton,
+  Divider,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import LogoutIcon from '@mui/icons-material/Logout';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import PeopleIcon from '@mui/icons-material/People';
+import PaymentIcon from '@mui/icons-material/Payment';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import SummarizeIcon from '@mui/icons-material/Summarize'; // Correct Icon Import
+
+// Import your admin components
+import OngoingBids from './Admin/OngoingBids';
+import BidArchive from './Admin/BidArchive';
+import BidParticipants from './Admin/BidParticipants';
+import Payments from './Admin/Payments';
+import Register from './Admin/Register';
+import ProfitLoss from './Admin/ProfitLoss';
+import NewBid from './Admin/NewBid';
 import BidPage from './Admin/BidPage';
 import AddUser from './Admin/AddUser';
 import RegisteredUsers from './Admin/RegisteredUsers';
-// import ParticipantDetails from './Admin/ParticipantDetails'
+// import ProfitSummary from './Admin/ProfitSummary'; // Assuming you have this component
+
+const drawerWidth = 240;
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [activePage, setActivePage] = useState(null);
-  const [activeBidId, setActiveBidId] = useState('');
+  const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    navigate('/'); // Redirect to login page
+    navigate('/signin'); // Redirect to login page
   };
 
-  const handleButtonClick = (operation) => {
-    switch (operation) {
-      case 'Dashboard':
-        setActivePage(null);
-        navigate('/dashboard');
-        break;
-      case 'Ongoing':
-        setActivePage(<OngoingBids setActivePage={setActivePage} setActiveBidId={setActiveBidId} activeBidId={activeBidId} />);
-        navigate('/dashboard/ongoingbids');
-        break;
-      case 'Archive':
-        setActivePage(<BidArchive />);
-        navigate('/dashboard/bidarchive');
-        break;
-      case 'Participants':
-        setActivePage(<BidParticipants />);
-        navigate('/dashboard/bidparticipants');
-        break;
-      case 'Payments':
-        setActivePage(<Payments />);
-        navigate('/dashboard/payments');
-        break;
-      case 'Register':
-        setActivePage(<Register />);
-        navigate('/dashboard/register');
-        break;
-      case 'ProfitLoss':
-        setActivePage(<ProfitLoss />);
-        navigate('/dashboard/profitloss');
-        break;
-      case 'NewBid':
-        setActivePage(<NewBid />);
-        navigate('/dashboard/newbid');
-        break;
-      case 'AddUser':
-        setActivePage(<AddUser />);
-        navigate('/dashboard/adduser');
-        break;
-      case 'RegisteredUsers':
-        setActivePage(<RegisteredUsers />);
-        navigate('/dashboard/registeredusers');
-        break;
-      default:
-        setActivePage(null);
-        break;
-    }
-  };
+  const menuItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+    { text: 'Ongoing Bids', icon: <DashboardIcon />, path: '/dashboard/ongoingbids' },
+    { text: 'Bid Archive', icon: <ArchiveIcon />, path: '/dashboard/bidarchive' },
+    { text: 'Participants', icon: <PeopleIcon />, path: '/dashboard/bidparticipants' },
+    { text: 'Payments', icon: <PaymentIcon />, path: '/dashboard/payments' },
+    { text: 'Profit/Loss', icon: <TrendingUpIcon />, path: '/dashboard/profitloss' },
+    { text: 'Registered Users', icon: <PeopleIcon />, path: '/dashboard/registeredusers' },
+    { text: 'New Bid', icon: <AddCircleIcon />, path: '/dashboard/newbid' },
+    { text: 'Create User', icon: <PersonAddIcon />, path: '/dashboard/adduser' },
+    { text: 'Profit Summary', icon: <SummarizeIcon />, path: '/dashboard/profitsummary' },
+  ];
 
-  return (
-    <div className="dashboard">
-    <div className='dashboard-root'>
-      <div className="sticky-header">
-        <div>
-          <h3 id="head">
-            Welcome Admin
-          </h3>
-        </div>
-        <div className="logout" onClick={handleLogout}>
-          <h2>Logout</h2>
-          <i className="ri-logout-box-r-line"></i>
-        </div>
-      </div>
-      <div className="container crud-btn">
-        <button className="btn btn-outline-primary" onClick={() => handleButtonClick('Ongoing')}>
-          Ongoing Bids
-        </button>
-        <button className="btn btn-outline-secondary" onClick={() => handleButtonClick('Archive')}>
-          Bid Archive
-        </button>
-        <button className="btn btn-outline-success" onClick={() => handleButtonClick('Payments')}>
-          Payments
-        </button>
-        <button className="btn btn-outline-danger" onClick={() => handleButtonClick('ProfitLoss')}>
-          Profit/Loss
-        </button>
-        <button className="btn btn-outline-warning" onClick={() => handleButtonClick('RegisteredUsers')}>
-          Registered Users
-        </button>
-        <button className="btn btn-outline-info" onClick={() => handleButtonClick('NewBid')}>
-          New Bid
-        </button>
-        <button className="btn btn-outline-success" onClick={() => handleButtonClick('AddUser')}>
-          Create User
-        </button>
-      </div>
-      {activePage}
-      <div className="container">
-        <Routes>
-          <Route path="/dashboard/ongoingbids" element={<OngoingBids setActivePage={setActivePage} />} />
-          <Route path="/dashboard/bidarchive" element={<BidArchive />} />
-          <Route path="/dashboard/payments" element={<Payments />} />
-          <Route path="/dashboard/profitloss" element={<ProfitLoss />} />
-          <Route path="/dashboard/newbid" element={<NewBid />} />
-          <Route path="/dashboard/bid/:id" element={<BidPage activeBidId={activeBidId} />} />
-          <Route path="/dashboard/adduser" element={<AddUser />} />
-          <Route path="/dashboard/registerduser" element={<RegisteredUsers />} />
-        </Routes>
-        
-
-      {/* summary was present here */}
-
-      </div>
-    </div>
+  const drawer = (
+    <div>
+      <Toolbar>
+        <Typography variant="h6" noWrap component="div">
+          Admin Dashboard
+        </Typography>
+      </Toolbar>
+      <Divider />
+      <List>
+        {menuItems.map((item) => (
+          <ListItem
+            button
+            key={item.text}
+            selected={location.pathname === item.path}
+            onClick={() => {
+              navigate(item.path);
+              if (isMobile) setMobileOpen(false); // Close drawer on mobile after navigation
+            }}
+          >
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.text} />
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+      <List>
+        <ListItem button onClick={handleLogout}>
+          <ListItemIcon>
+            <LogoutIcon />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
+        </ListItem>
+      </List>
     </div>
   );
-}
+
+  return (
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+      <AppBar
+        position="fixed"
+        sx={{
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: `${drawerWidth}px` },
+        }}
+      >
+        <Toolbar>
+          {isMobile && (
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2, display: { sm: 'none' } }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
+          <Typography variant="h6" noWrap component="div">
+            {menuItems.find((item) => item.path === location.pathname)?.text || 'Dashboard'}
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      {/* Drawer for desktop and mobile */}
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        aria-label="admin navigation"
+      >
+        <Drawer
+          variant={isMobile ? 'temporary' : 'permanent'}
+          open={isMobile ? mobileOpen : true}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: 'block', sm: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          }}
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+        }}
+      >
+        <Toolbar />
+        <Routes>
+          {/* Redirect /dashboard to /dashboard/ongoingbids */}
+          <Route path="/" element={<Navigate to="ongoingbids" replace />} />
+
+          {/* Define nested routes */}
+          <Route path="ongoingbids" element={<OngoingBids />} />
+          <Route path="bidarchive" element={<BidArchive />} />
+          <Route path="bidparticipants" element={<BidParticipants />} />
+          <Route path="payments" element={<Payments />} />
+          <Route path="profitloss" element={<ProfitLoss />} />
+          <Route path="registeredusers" element={<RegisteredUsers />} />
+          <Route path="newbid" element={<NewBid />} />
+          <Route path="adduser" element={<AddUser />} />
+          {/* <Route path="profitsummary" element={<ProfitSummary />} />  */}
+          <Route path="bid/:id" element={<BidPage />} />
+          {/* Add more nested routes as needed */}
+
+          {/* Catch-all for undefined nested routes */}
+          <Route path="*" element={<Navigate to="ongoingbids" replace />} />
+        </Routes>
+      </Box>
+    </Box>
+  );
+};
 
 export default Dashboard;
