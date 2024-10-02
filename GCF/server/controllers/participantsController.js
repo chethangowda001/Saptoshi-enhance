@@ -128,3 +128,64 @@ exports.getParticipantDetailsWithBids = async (req, res) => {
     res.status(500).json({ message: 'Server Error', success: false, error: error.message });
   }
 };
+
+exports.deleteParticipantDetails = async (req, res) => {
+  const { id } = req.params;
+
+  // Check if id is valid
+  if (!id) {
+    return res.status(400).json({ message: "Invalid participant ID" });
+  }
+
+  try {
+    // Find and delete the participant
+    const participant = await Participant.findByIdAndDelete(id);
+
+    // If no participant was found
+    if (!participant) {
+      return res.status(404).json({ message: "Participant not found" });
+    }
+
+    // Successful deletion
+    res.status(200).json({ message: "Participant successfully deleted" });
+  } catch (error) {
+    // Log and return an internal server error message
+    console.error("Error deleting participant:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
+  }
+};
+
+
+exports.updateParticipantsDetails = async (req, res) => {
+  const { id } = req.params;
+  
+  // Validate participant ID
+  if (!id) {
+    return res.status(400).json({ message: "Participant ID is required" });
+  }
+
+  const participantDetails = req.body;
+
+  try {
+    // Find participant by ID and update details
+    const updatedParticipant = await Participant.findByIdAndUpdate(
+      id,
+      { $set: participantDetails }, // Use $set to update only the fields provided in the body
+      { new: true, runValidators: true } // Return the updated document and run validation on the updates
+    );
+
+    // If no participant is found with the provided ID
+    if (!updatedParticipant) {
+      return res.status(404).json({ message: "Participant not found" });
+    }
+
+    // Successful update
+    res.status(200).json({ message: "Participant updated successfully", data: updatedParticipant });
+  } catch (error) {
+    // Log and return an internal server error message
+    console.error("Error updating participant details:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
+  }
+};
+
+

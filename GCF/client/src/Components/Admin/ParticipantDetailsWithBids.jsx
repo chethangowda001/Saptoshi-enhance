@@ -1,9 +1,67 @@
-// components/ParticipantDetailsWithBids.jsx
+// src/Components/Admin/ParticipantDetailsWithBids.jsx
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import '../../css/ParticipantDetails.css'; // Ensure this path is correct
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Grid,
+  Typography,
+  Card,
+  CardContent,
+  CardMedia,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Tooltip,
+  IconButton,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import DescriptionIcon from '@mui/icons-material/Description';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
+
+// Styled components using Emotion via MUI's styled API
+const ProfileCard = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  marginBottom: theme.spacing(4),
+  [theme.breakpoints.down('sm')]: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+}));
+
+const ProfileDetails = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  padding: theme.spacing(2),
+}));
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  fontWeight: 'bold',
+}));
+
+const ProfileImage = styled(CardMedia)(({ theme }) => ({
+  width: 200,
+  height: 200,
+  objectFit: 'cover',
+  borderRadius: '50%',
+  margin: theme.spacing(2),
+  [theme.breakpoints.down('sm')]: {
+    width: 150,
+    height: 150,
+  },
+}));
 
 const ParticipantDetailsWithBids = () => {
   const { id } = useParams(); // Extract 'id' from URL parameters
@@ -12,7 +70,10 @@ const ParticipantDetailsWithBids = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log('Participant ID:', id); // Debugging log
+  // Initialize react-toastify
+  useEffect(() => {
+    // Optional: Customize toast notifications here if needed
+  }, []);
 
   // Fetch participant details along with bids
   useEffect(() => {
@@ -24,23 +85,21 @@ const ParticipantDetailsWithBids = () => {
       return;
     }
 
-    console.log('Fetching participant details for ID:', id);
-
     const fetchParticipantDetails = async () => {
       try {
         const response = await axios.get(`http://localhost:3001/participants/${id}/bids`);
-        console.log('API Response:', response);
 
         if (response.data.success) {
           setParticipantData(response.data);
-          console.log('Participant Data:', response.data);
+          toast.success('Participant data fetched successfully!');
         } else {
           setError(response.data.message || 'Failed to fetch participant data');
-          console.error('Error Message:', response.data.message);
+          toast.error(response.data.message || 'Failed to fetch participant data');
         }
       } catch (err) {
-        console.error("Error fetching participant details:", err);
-        setError("Error fetching participant details");
+        console.error('Error fetching participant details:', err);
+        setError('Error fetching participant details');
+        toast.error('Error fetching participant details');
       } finally {
         setLoading(false);
       }
@@ -62,131 +121,171 @@ const ParticipantDetailsWithBids = () => {
   // Render loading state
   if (loading) {
     return (
-      <div className="container mt-4">
-        <p>Loading...</p>
-      </div>
+      <Container sx={{ mt: 10, textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          Loading Participant Details...
+        </Typography>
+      </Container>
     );
   }
 
   // Render error state
   if (error) {
     return (
-      <div className="container mt-4">
-        <p className="text-danger">{error}</p>
-      </div>
+      <Container sx={{ mt: 10 }}>
+        <Alert severity="error">{error}</Alert>
+        <Box sx={{ mt: 2 }}>
+          <Button variant="contained" color="primary" onClick={handleBack} startIcon={<ArrowBackIcon />}>
+            Back to Registered Users
+          </Button>
+        </Box>
+      </Container>
     );
   }
 
   // Render when no data is available
   if (!participantData) {
     return (
-      <div className="container mt-4">
-        <p>No participant data available</p>
-      </div>
+      <Container sx={{ mt: 10 }}>
+        <Alert severity="warning">No participant data available.</Alert>
+        <Box sx={{ mt: 2 }}>
+          <Button variant="contained" color="primary" onClick={handleBack} startIcon={<ArrowBackIcon />}>
+            Back to Registered Users
+          </Button>
+        </Box>
+      </Container>
     );
   }
 
   const { participantDetails, bids } = participantData;
 
   return (
-    <div className="container mt-5 pt-5">
-      <div className="card">
-        <div className="card-header">
-          <h2>Participant Details with Bids</h2>
-        </div>
-        <div className="card-body">
-          {/* Participant Information */}
-          <div className="row mb-4">
-            <div className="col-md-3">
-              {participantDetails.profileImageURL ? (
-                <img
-                  src={`http://localhost:3001${participantDetails.profileImageURL}`}
-                  alt={`${participantDetails.userName}'s profile`}
-                  className="img-fluid rounded"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = '/path/to/default-image.png'; // Provide a default image path
-                  }}
-                />
-              ) : (
-                <div className="text-center">No Image Available</div>
-              )}
-            </div>
-            <div className="col-md-9">
-              <h4>{participantDetails.userName}</h4>
-              <p><strong>Email:</strong> {participantDetails.userEmail}</p>
-              <p><strong>Phone No:</strong> {participantDetails.userPhoneNo}</p>
-              <p><strong>Address:</strong> {participantDetails.address}</p>
-              <p><strong>Aadhar No:</strong> {participantDetails.aadharNo}</p>
-              <p><strong>PAN No:</strong> {participantDetails.panNo}</p>
-              <p><strong>Document:</strong> 
-                {participantDetails.document ? (
-                  <a href={`http://localhost:3001/${participantDetails.document}`} target="_blank" rel="noopener noreferrer">View Document</a>
-                ) : (
-                  'No Document'
-                )}
-              </p>
-              <p><strong>Created At:</strong> {new Date(participantDetails.createdAt).toLocaleDateString()}</p>
-            </div>
-          </div>
-
-          {/* Bids Table */}
-          <h3 className="mt-4">Bids</h3>
-          <table className="table table-bordered table-hover">
-            <thead className="thead-dark">
-              <tr>
-                <th>Bid No</th>
-                <th>Bid Winner</th>
-                <th>Winner Phone</th>
-                <th>Bid Value</th>
-                <th>Bid PayOut</th>
-                <th>Payment Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bids.length > 0 ? (
-                bids.map((bid, index) => (
-                  <tr key={index}>
-                    <td>{bid.Bids.BidNo}</td>
-                    <td>{bid.Bids.BidWinner?.userName || "Unknown"}</td>
-                    <td>{bid.Bids.BidWinner?.phoneNumber || "Unknown"}</td>
-                    <td>{bid.Bids.BidValue}</td>
-                    <td>{bid.users.BidPayOut.toFixed(2)}</td>
-                    <td>
-                      {bid.Bids.PaymentStatus.length > 0 ? (
-                        <ul className="list-unstyled mb-0">
-                          {bid.Bids.PaymentStatus.map((payment, idx) => (
-                            <li key={idx}>
-                              <strong>{payment.userName}:</strong> {payment.payment} ({payment.payed ? 'Paid' : 'Not Paid'})
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        "No payment data"
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center">No bids available</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-
-          {/* Action Buttons */}
-          <div className="d-flex justify-content-between mt-4">
-            <button className="btn btn-primary" onClick={handleBack}>
-              Back to Registered Users
-            </button>
-            <button className="btn btn-secondary" onClick={handleViewParticipantDetails}>
+    <Container sx={{ mt: 5, mb: 5 }}>
+      {/* Participant Information */}
+      <ProfileCard>
+        {participantDetails.profileImageURL ? (
+          <ProfileImage
+            component="img"
+            image={`http://localhost:3001${participantDetails.profileImageURL}`}
+            alt={`${participantDetails.userName}'s profile`}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = '/default-profile.png'; // Provide a default image path
+            }}
+          />
+        ) : (
+          <ProfileImage
+            component="img"
+            image="/default-profile.png" // Provide a default image path
+            alt="Default Profile"
+          />
+        )}
+        <ProfileDetails>
+          <Typography variant="h5" gutterBottom>
+            {participantDetails.userName}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Email:</strong> {participantDetails.userEmail}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Phone No:</strong> {participantDetails.userPhoneNo}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Address:</strong> {participantDetails.address}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Aadhar No:</strong> {participantDetails.aadharNo}
+          </Typography>
+          <Typography variant="body1">
+            <strong>PAN No:</strong> {participantDetails.panNo}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Document:</strong>{' '}
+            {participantDetails.document ? (
+              <Tooltip title="View Document">
+                <IconButton
+                  component="a"
+                  href={`http://localhost:3001/${participantDetails.document}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  color="primary"
+                >
+                  <DescriptionIcon />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              'No Document'
+            )}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Created At:</strong> {new Date(participantDetails.createdAt).toLocaleDateString()}
+          </Typography>
+          <Box sx={{ mt: 2 }}>
+            <Button variant="contained" color="primary" onClick={handleViewParticipantDetails} startIcon={<VisibilityIcon />}>
               View Participant Details
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+            </Button>
+          </Box>
+        </ProfileDetails>
+      </ProfileCard>
+
+      {/* Bids Table */}
+      <Box>
+        <Typography variant="h6" gutterBottom>
+          Bids
+        </Typography>
+        {bids.length > 0 ? (
+          <TableContainer component={Paper}>
+            <Table aria-label="bids table">
+              <TableHead>
+                <TableRow>
+                  <StyledTableCell align="center">Bid No</StyledTableCell>
+                  <StyledTableCell align="center">Bid Winner</StyledTableCell>
+                  <StyledTableCell align="center">Winner Phone</StyledTableCell>
+                  <StyledTableCell align="center">Bid Value</StyledTableCell>
+                  <StyledTableCell align="center">Bid PayOut</StyledTableCell>
+                  <StyledTableCell align="center">Payment Status</StyledTableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {bids.map((bid, index) => (
+                  <TableRow key={index} hover>
+                    <TableCell align="center">{bid.Bids.BidNo}</TableCell>
+                    <TableCell align="center">{bid.Bids.BidWinner?.userName || 'Unknown'}</TableCell>
+                    <TableCell align="center">{bid.Bids.BidWinner?.phoneNumber || 'Unknown'}</TableCell>
+                    <TableCell align="center">{bid.Bids.BidValue}</TableCell>
+                    <TableCell align="center">{bid.users.BidPayOut.toFixed(2)}</TableCell>
+                    <TableCell align="center">
+                      {bid.Bids.PaymentStatus.length > 0 ? (
+                        <Box>
+                          {bid.Bids.PaymentStatus.map((payment, idx) => (
+                            <Typography key={idx} variant="body2" color={payment.payed ? 'green' : 'error'}>
+                              {payment.userName}: {payment.payment} ({payment.payed ? 'Paid' : 'Not Paid'})
+                            </Typography>
+                          ))}
+                        </Box>
+                      ) : (
+                        'No payment data'
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <Alert severity="info">No bids available for this participant.</Alert>
+        )}
+      </Box>
+
+      {/* Action Buttons */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+        <Button variant="outlined" color="secondary" onClick={handleBack} startIcon={<ArrowBackIcon />}>
+          Back to Registered Users
+        </Button>
+        {/* Add more action buttons here if needed */}
+      </Box>
+    </Container>
   );
 };
 

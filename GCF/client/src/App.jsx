@@ -42,6 +42,17 @@ const App = () => {
 
   return (
     <BrowserRouter>
+     <ToastContainer 
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
       <ThemeProvider theme={theme}>
         {/* Header Component */}
         <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}><CircularProgress /></div>}>

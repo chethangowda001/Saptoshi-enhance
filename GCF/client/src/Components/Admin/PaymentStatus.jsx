@@ -35,6 +35,7 @@ const PaymentStatus = () => {
                         <th>Bid Winner</th>
                         <th>Winner Phone</th>
                         <th>Payment Amount</th>
+                        <th>Username</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -50,6 +51,7 @@ const PaymentStatus = () => {
                                                 <td rowSpan={bid.PaymentStatus.length}>{bid.BidNo}</td>
                                                 <td rowSpan={bid.PaymentStatus.length}>{bid.BidWinner || "Unknown"}</td>
                                                 <td rowSpan={bid.PaymentStatus.length}>{bid.BidWinnerPhone || "Unknown"}</td>
+                                                <td rowSpan={bid.PaymentStatus.length}> {bid.useerName || "Unknown"}</td>
                                             </>
                                         )}
                                         <td>{status.payment}</td>

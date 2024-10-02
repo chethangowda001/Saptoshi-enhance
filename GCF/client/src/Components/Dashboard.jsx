@@ -33,7 +33,7 @@ import SummarizeIcon from '@mui/icons-material/Summarize';
 import OngoingBids from './Admin/OngoingBids';
 import BidArchive from './Admin/BidArchive';
 import BidParticipants from './Admin/BidParticipants';
-import Payments from './Admin/Payments';
+import Payments from './Admin/PaymentDueUsers';
 import Register from './Admin/Register';
 import ProfitLoss from './Admin/ProfitLoss';
 import NewBid from './Admin/NewBid';

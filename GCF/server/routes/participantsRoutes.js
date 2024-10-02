@@ -8,6 +8,8 @@ router.get('/all', participantsController.getAllParticipants);
 router.post('/new', upload.single('profileImage'), participantsController.addParticipant);
 router.get('/:id',participantsController.getOneCompleteParticipant )
 router.get("/:id/bids", participantsController.getParticipantDetailsWithBids)
+router.delete("/:id/delete",participantsController.deleteParticipantDetails)
+router.put("/:id/update", participantsController.updateParticipantsDetails);
 
 
 module.exports = router;

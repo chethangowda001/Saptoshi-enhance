@@ -148,52 +148,55 @@ const BidPage = () => {
       alert('No active bid found.');
       return;
     }
-
+  
     let totalCredit = 0;
     let totalDebit = nearestBid.BidPayOut || 0;
-
+    const unpaidUsers = [];
+  
     try {
       console.log(`Closing bid No.: ${nearestBid.BidNo} for bid ID: ${bidData._id}`);
       // Iterate over the users in bidData
       for (const user of bidData.users) {
         // Find the corresponding bid in Bids array by BidNo
-        const bid = bidData.Bids.find((b) => b.BidNo === nearestBid.BidNo);
-        if (!bid) continue;
-
+        const bidRound = bidData.Bids.find((b) => b.BidNo === nearestBid.BidNo);
+        if (!bidRound) continue;
+  
         // Check if the user has paid
-        const paymentStatus = bid.PaymentStatus.find((ps) => ps.u_id === user._id);
+        const paymentStatus = bidRound.PaymentStatus.find((ps) => ps.u_id.toString() === user._id.toString());
         if (paymentStatus && paymentStatus.payed) {
           totalCredit += paymentStatus.payment || 0;
         } else {
-          // Prepare data to send to API for unpaid user
-          const requestData = {
-            participantId: user.participantId,
+          // Collect data for unpaid users
+          unpaidUsers.push({
+            participantId: user.participantId.toString(),
             userName: user.userName,
-            userPhone: user.userPhoneNo,
-            bidId: bidData._id,
+            userPhoneNo: user.userPhoneNo,
+            bidId: bidData._id.toString(),
             payment: 0, // Set default payment for unpaid user
             bidNo: nearestBid.BidNo,
             bidDate: nearestBid.BidDate,
-          };
-
-          console.log(`Updating payment due for user: ${user.userName}`);
-          // Make POST API call to update paymentDue collection
-          await axios.post('http://localhost:3001/update-payment-due', requestData);
-          console.log(`Payment due updated for user ${user.userName}:`, requestData);
+          });
         }
       }
-
-      // Prepare data to send to API
-      const requestData = {
+  
+      // Batch update payment dues for unpaid users
+      if (unpaidUsers.length > 0) {
+        console.log(`Batch updating payment dues for ${unpaidUsers.length} users`);
+        await axios.post('http://localhost:3001/payments/update-payment-due', { unpaidUsers });
+        console.log('Batch payment dues updated successfully');
+      }
+  
+      // Prepare data to send to API for closing the bid
+      const closeBidData = {
         totalCredit,
         totalDebit,
-        bidId: bidData._id,
+        bidId: bidData._id.toString(),
         bidNo: nearestBid.BidNo,
       };
-
-      console.log('Closing bid with data:', requestData);
+  
+      console.log('Closing bid with data:', closeBidData);
       // Make API call to update bid data
-      const response = await axios.put(`http://localhost:3001/bids/${bidData._id}/close-bid/${nearestBid.BidNo}`, requestData);
+      const response = await axios.put(`http://localhost:3001/bids/${bidData._id}/close-bid/${nearestBid.BidNo}`, closeBidData);
       console.log('Close bid response:', response.data);
       setBidClosed(true);
       await fetchBidData();
@@ -205,7 +208,7 @@ const BidPage = () => {
       alert('Failed to close bid.');
     }
   };
-
+  
   const isColumnEditable = (index) => {
     return nearestBid && nearestBid.BidNo === index + 1 && nearestBid.BidStart;
   };
