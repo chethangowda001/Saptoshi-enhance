@@ -1,30 +1,65 @@
-  .card {
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+/* src/css/NewBid.css */
+
+.new-bid-container {
+  padding: 20px;
+}
+
+.bid-card {
+  position: relative;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  background-color: #ffffff;
+}
+
+.bid-card .text-center {
+  margin-bottom: 20px;
+}
+
+.submit-button {
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #1976d2;
+  box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
+}
+
+/* Navigation button styling */
+.navigate-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 8px 18px;
+  background-color: #2c3e50;
+  color: #ffffff;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.navigate-button:hover {
+  background-color: #34495e;
+  transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .bid-card {
+    padding: 15px;
   }
-  
-  .card-body {
-    padding: 2rem;
+
+  .submit-button,
+  .navigate-button {
+    font-size: 14px;
+    padding: 10px;
   }
-  
-  .form-group label {
-    font-weight: 600;
-  }
-  
-  .form-control {
-    border-radius: 0.25rem;
-    padding: 0.75rem;
-  }
-  
-  .btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-    padding: 0.5rem 1.5rem;
-    border-radius: 0.25rem;
-  }
-  
-  .btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
-  }
-  
+}

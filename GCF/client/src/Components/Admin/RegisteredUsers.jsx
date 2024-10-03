@@ -13,7 +13,8 @@ const RegisteredUsers = () => {
   const navigate = useNavigate(); // Using navigate hook
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage] = useState(10);
   // State for Delete Modal
   const [deleteUserId, setDeleteUserId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -30,6 +31,14 @@ const RegisteredUsers = () => {
     profileImageURL: '',
   });
   const [showEditModal, setShowEditModal] = useState(false);
+  
+// Pagination: Calculate the current users to display
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+
+  // Pagination: Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   useEffect(() => {
     fetchUsers();
@@ -117,11 +126,14 @@ const RegisteredUsers = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     const { id, ...updatedData } = editUserData;
-
+  
     try {
-      const response = await axios.put(`http://localhost:3001/participants/${id}/update`, updatedData);
-      // Update the user in the local state
-      setUsers(prevUsers => prevUsers.map(user => user._id === id ? response.data.data : user));
+      // Optimistic UI update
+      setUsers(prevUsers => prevUsers.map(user => 
+        user._id === id ? { ...user, ...updatedData } : user
+      ));
+  
+      await axios.put(`http://localhost:3001/participants/${id}/update`, updatedData);
       toast.success('Participant updated successfully!');
     } catch (error) {
       console.error('Error updating participant:', error);
@@ -140,6 +152,7 @@ const RegisteredUsers = () => {
       });
     }
   };
+  
 
   return (
     <div className="container mt-5">
@@ -216,16 +229,17 @@ const RegisteredUsers = () => {
                     <td>{user.aadharNo}</td>
                     <td>{user.panNo}</td>
                     <td>
-                      {user.profileImageURL ? (
-                        <img 
-                          src={`http://localhost:3001${user.profileImageURL}`} 
-                          alt={`${user.userName}'s profile`} 
-                          className="img-thumbnail profile-img"
-                        />
-                      ) : (
-                        <span className="text-muted">No image</span>
-                      )}
-                    </td>
+  {user.profileImageURL ? (
+    <img 
+      src={user.profileImageURL.startsWith("http") ? user.profileImageURL : `http://localhost:3001${user.profileImageURL}`} 
+      alt={`${user.userName}'s profile`} 
+      className="img-thumbnail profile-img"
+    />
+  ) : (
+    <span className="text-muted">No image</span>
+  )}
+</td>
+
                     <td>{formatDate(user.createdAt)}</td>
                     <td>
                       {/* View Details Button */}

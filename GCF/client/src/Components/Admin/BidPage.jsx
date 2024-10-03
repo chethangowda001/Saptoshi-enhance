@@ -1,13 +1,13 @@
-// src/Components/Admin/BidPage.js
-
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import BidModal from './BidModal';
 import "../../css/BidPage.css";
 
 const BidPage = () => {
-  const { id } = useParams(); // Retrieve bidId from URL
+  const { id } = useParams();
   const [bidData, setBidData] = useState(null);
   const [nearestBid, setNearestBid] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
@@ -15,9 +15,8 @@ const BidPage = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [showBidModal, setShowBidModal] = useState(false);
   const [bidClosed, setBidClosed] = useState(true);
-  const [error, setError] = useState(null); // To handle errors
+  const [error, setError] = useState(null);
 
-  // Memoize fetchBidData to prevent unnecessary re-renders
   const fetchBidData = useCallback(async () => {
     try {
       console.log(`Fetching bid data for ID: ${id}`);
@@ -26,10 +25,11 @@ const BidPage = () => {
       setBidData(response.data);
       const nearest = getNearestBidNo(response.data.Bids);
       setNearestBid(nearest);
-      setError(null); // Clear any previous errors
+      setError(null);
     } catch (error) {
       console.error('Error fetching bid data:', error);
       setError('Failed to fetch bid data.');
+      toast.error('Failed to fetch bid data.');
     }
   }, [id]);
 
@@ -39,32 +39,30 @@ const BidPage = () => {
     }
   }, [id, fetchBidData]);
 
-  const handleInputChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
+  const handleInputChange = useCallback(async (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    if (value.trim()) {
+      try {
+        console.log(`Searching participants with term: ${value}`);
+        const response = await axios.get(`http://localhost:3001/participants?search=${value}`);
+        console.log('Search results:', response.data);
+        setSearchResults(response.data);
+        setError(null);
+      } catch (error) {
+        console.error('Error searching participants:', error);
+        setError('Failed to search participants.');
+        toast.error('Failed to search participants.');
+      }
+    } else {
+      setSearchResults([]);
+    }
+  }, []);
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
     return new Date(dateString).toLocaleDateString('en-GB', options);
-  };
-
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) {
-      alert('Please enter a search term.');
-      return;
-    }
-
-    try {
-      console.log(`Searching participants with term: ${searchTerm}`);
-      const response = await axios.get(`http://localhost:3001/participants?search=${searchTerm}`);
-      console.log('Search results:', response.data);
-      setSearchResults(response.data);
-      setShowSearch(true); // Show search results after fetching
-      setError(null); // Clear any previous errors
-    } catch (error) {
-      console.error('Error searching participants:', error);
-      setError('Failed to search participants.');
-    }
   };
 
   const handleAddUser = async (user) => {
@@ -72,45 +70,40 @@ const BidPage = () => {
       const { userName, userPhoneNo } = user;
       console.log(`Adding user: ${userName}, Phone: ${userPhoneNo} to bid ID: ${id}`);
 
-      // Add user to the bid via backend
       const response = await axios.post(`http://localhost:3001/bids/${id}/add-user`, { userName, userPhoneNo });
 
-      console.log('Add user response:', response);
-
       if (response.status === 201) {
-        alert(response.data.message);
+        toast.success(response.data.message);
       } else if (response.status === 200) {
-        // Update bidData with the response
         setBidData(response.data);
         setSearchResults([]);
         setSearchTerm('');
         setShowSearch(false);
-        // Show success alert
-        alert('User added successfully!');
+        toast.success('User added successfully!');
       } else {
-        alert('Unexpected response while adding user.');
+        toast.warning('Unexpected response while adding user.');
       }
-      setError(null); // Clear any previous errors
+      setError(null);
     } catch (error) {
       console.error('Error adding user:', error);
       setError('Failed to add user.');
+      toast.error('Failed to add user.');
     }
   };
 
   const getNearestBidNo = (bids) => {
     const currentDate = new Date();
     let nearestBid = null;
-    let nearestDiff = Infinity; // Start with Infinity to ensure any valid date difference is smaller
+    let nearestDiff = Infinity;
 
     for (const bid of bids) {
       const bidDate = new Date(bid.BidDate);
       const diff = Math.abs(bidDate - currentDate);
-      if (diff < nearestDiff && !bid.BidClose) { // Ensure BidClose is false
+      if (diff < nearestDiff && !bid.BidClose) {
         nearestBid = bid;
         nearestDiff = diff;
       }
     }
-    console.log('Nearest bid:', nearestBid);
     return nearestBid;
   };
 
@@ -127,25 +120,23 @@ const BidPage = () => {
         `http://localhost:3001/bids/${bidData._id}/update-bid/${bidNo}`,
         updatedBid
       );
-      console.log('Start bid response:', response);
   
       if (response.status === 200) {
         await fetchBidData();
-        alert('Bid started successfully!');
+        toast.success('Bid started successfully!');
       } else {
-        alert('Failed to start bid');
+        toast.error('Failed to start bid');
       }
     } catch (error) {
       console.error('Error starting bid:', error);
       setError('Failed to start bid.');
-      alert('Failed to start bid.');
+      toast.error('Failed to start bid.');
     }
   };
-  
 
   const handleCloseBid = async () => {
     if (!nearestBid) {
-      alert('No active bid found.');
+      toast.warning('No active bid found.');
       return;
     }
   
@@ -154,39 +145,30 @@ const BidPage = () => {
     const unpaidUsers = [];
   
     try {
-      console.log(`Closing bid No.: ${nearestBid.BidNo} for bid ID: ${bidData._id}`);
-      // Iterate over the users in bidData
       for (const user of bidData.users) {
-        // Find the corresponding bid in Bids array by BidNo
         const bidRound = bidData.Bids.find((b) => b.BidNo === nearestBid.BidNo);
         if (!bidRound) continue;
   
-        // Check if the user has paid
         const paymentStatus = bidRound.PaymentStatus.find((ps) => ps.u_id.toString() === user._id.toString());
         if (paymentStatus && paymentStatus.payed) {
           totalCredit += paymentStatus.payment || 0;
         } else {
-          // Collect data for unpaid users
           unpaidUsers.push({
             participantId: user.participantId.toString(),
             userName: user.userName,
             userPhoneNo: user.userPhoneNo,
             bidId: bidData._id.toString(),
-            payment: 0, // Set default payment for unpaid user
+            payment: 0,
             bidNo: nearestBid.BidNo,
             bidDate: nearestBid.BidDate,
           });
         }
       }
   
-      // Batch update payment dues for unpaid users
       if (unpaidUsers.length > 0) {
-        console.log(`Batch updating payment dues for ${unpaidUsers.length} users`);
         await axios.post('http://localhost:3001/payments/update-payment-due', { unpaidUsers });
-        console.log('Batch payment dues updated successfully');
       }
   
-      // Prepare data to send to API for closing the bid
       const closeBidData = {
         totalCredit,
         totalDebit,
@@ -194,21 +176,18 @@ const BidPage = () => {
         bidNo: nearestBid.BidNo,
       };
   
-      console.log('Closing bid with data:', closeBidData);
-      // Make API call to update bid data
       const response = await axios.put(`http://localhost:3001/bids/${bidData._id}/close-bid/${nearestBid.BidNo}`, closeBidData);
-      console.log('Close bid response:', response.data);
       setBidClosed(true);
       await fetchBidData();
-      alert('Bid closed successfully!');
-      setError(null); // Clear any previous errors
+      toast.success('Bid closed successfully!');
+      setError(null);
     } catch (error) {
       console.error('Error closing bid:', error);
       setError('Failed to close bid.');
-      alert('Failed to close bid.');
+      toast.error('Failed to close bid.');
     }
   };
-  
+
   const isColumnEditable = (index) => {
     return nearestBid && nearestBid.BidNo === index + 1 && nearestBid.BidStart;
   };
@@ -240,24 +219,22 @@ const BidPage = () => {
       return;
     }
 
-    // Find the PaymentStatus entry for the user in the nearest bid
-    const paymentStatus = nearestBid.PaymentStatus.find((ps) => ps.u_id === userId);
-    const currentPayedStatus = paymentStatus ? paymentStatus.payed : false;
-
     try {
       console.log(`Toggling payment status for user ID: ${userId} in bid No.: ${nearestBid.BidNo}`);
+      const paymentStatus = nearestBid.PaymentStatus.find((ps) => ps.u_id === userId);
+      const currentPayedStatus = paymentStatus ? paymentStatus.payed : false;
+      
       await axios.put(`http://localhost:3001/bids/${id}/users/${userId}/payment`, {
         bidNo: nearestBid.BidNo,
         payed: !currentPayedStatus,
       });
 
-      // Refresh bid data to reflect changes
       await fetchBidData();
-      alert('Payment status updated successfully!');
+      toast.success('Payment status updated successfully!');
     } catch (error) {
       console.error('Error updating payment status:', error);
       setError('Failed to update payment status.');
-      alert('Failed to update payment status.');
+      toast.error('Failed to update payment status.');
     }
   };
 
@@ -419,9 +396,6 @@ const BidPage = () => {
               value={searchTerm}
               onChange={handleInputChange}
             />
-            <button className="btn btn-outline-success" type="button" onClick={handleSearch}>
-              Search
-            </button>
           </div>
 
           {searchResults.length > 0 && (
@@ -494,6 +468,8 @@ const BidPage = () => {
         nearestBid={nearestBid}
         onBidStart={handleBidStart}
       />
+
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick pauseOnHover draggable />
     </div>
   );
 };

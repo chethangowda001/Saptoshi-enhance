@@ -59,5 +59,26 @@ const bidSchema = new Schema({
   ],
 });
 
-
 module.exports = mongoose.model('Bids', bidSchema); 
+
+// bidSchema.virtual('profit').get(function() {
+//   const bidSize = typeof this.BidSize === 'number' ? this.BidSize : 0;
+//   const monthDuration = typeof this.MonthDuration === 'number' ? this.MonthDuration : 0;
+//   const bidPayOut = typeof this.BidPayOut === 'number' ? this.BidPayOut : 0;
+//   const bidManagementAccount = Array.isArray(this.BidManagementAccount) ? this.BidManagementAccount : [];
+//   const totalManagementDebit = bidManagementAccount.reduce((acc, account) => {
+//     const managementDebit = typeof account.ManagementDebit === 'number' ? account.ManagementDebit : 0;
+//     return acc + managementDebit;
+//   }, 0);
+//   const totalRevenue = bidSize * monthDuration;
+//   const totalExpenses = bidPayOut + totalManagementDebit;
+//   return totalRevenue - totalExpenses;
+// });
+
+
+// // Enable virtual fields in toJSON and toObject
+// bidSchema.set('toJSON', { virtuals: true });
+// bidSchema.set('toObject', { virtuals: true });
+
+
+

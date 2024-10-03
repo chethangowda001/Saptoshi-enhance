@@ -1,5 +1,6 @@
 const Bids = require('../models/Bids');
 const Participant = require('../models/Participants');
+const Payment = require('../models/PaymentDue');
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Types;
 
@@ -359,6 +360,77 @@ exports.archiveSummary = async (req, res) => {
   }
 };
 
+
+exports.getProfit = async (req, res) => {
+  try {
+    const bids = await Bids.find()
+      .populate('users.participantId')
+      .populate('Bids.PaymentStatus.u_id');
+      
+    // The virtual 'profit' should now be included in each bid
+    res.status(200).json({ success: true, data: bids });
+  } catch (error) {
+    console.error('Error fetching bids:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+
+// controllers/bidsController.js
+
+
+
+// Controller to mark a user as paid
+exports.markUserAsPaid = async (req, res) => {
+  const { participantId, bidId, bidNo } = req.body;
+
+  // Validate required fields
+  if (!participantId || !bidId || !bidNo) {
+    return res.status(400).json({ message: 'participantId, bidId, and bidNo are required' });
+  }
+
+  try {
+    // Step 1: Remove the corresponding PaymentDue document
+    const deletedPayment = await Payment.deleteOne({
+      userId: participantId,
+      bidId: bidId,
+      bidNo: bidNo,
+    });
+
+    if (deletedPayment.deletedCount === 0) {
+      return res.status(404).json({ message: 'Payment due record not found' });
+    }
+
+    // Step 2: Update the Bids schema's PaymentStatus to set 'payed' to true
+    const updateResult = await Bids.updateOne(
+      {
+        _id: bidId,
+        'Bids.BidNo': bidNo,
+        'Bids.PaymentStatus.u_id': participantId,
+      },
+      {
+        $set: {
+          'Bids.$.PaymentStatus.$[elem].payed': true,
+        },
+      },
+      {
+        arrayFilters: [
+          { 'elem.u_id': participantId },
+        ],
+      }
+    );
+
+    if (updateResult.nModified === 0) {
+      return res.status(404).json({ message: 'Bid or PaymentStatus not found for the user' });
+    }
+
+    res.status(200).json({ message: 'User payment updated successfully' });
+
+  } catch (error) {
+    console.error('Error marking user as paid:', error);
+    res.status(500).json({ message: 'Failed to mark user as paid' });
+  }
+};
 
 
 

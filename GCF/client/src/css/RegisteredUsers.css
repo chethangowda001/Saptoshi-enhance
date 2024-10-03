@@ -4,35 +4,55 @@
   padding: 20px;
 }
 
-.search-input {
-  width: 100%;
-  padding: 10px;
-  font-size: 1rem;
+.toolbar {
+  display: flex;
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
 }
 
-.registered-users-table th, .registered-users-table td {
-  vertical-align: middle;
-  text-align: center;
+.table-container {
+  margin-top: 20px;
 }
 
+.user-link {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.user-link:hover {
+  text-decoration: underline;
+}
 
 .profile-img {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
   border-radius: 50%;
 }
 
-@media (min-width: 576px) {
-  .profile-img {
-    width: 50px;
-    height: 50px;
-  }
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
 }
 
-@media (min-width: 768px) {
-  .profile-img {
-    width: 60px;
-    height: 60px;
+.pagination {
+  margin-top: 10px;
+}
+
+.modal-content {
+  border-radius: 8px;
+}
+
+@media (max-width: 600px) {
+  .toolbar {
+    flex-direction: column;
+  }
+
+  .toolbar .MuiTextField-root {
+    width: 100%;
   }
 }

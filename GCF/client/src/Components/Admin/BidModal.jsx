@@ -1,4 +1,4 @@
-// src/Components/Admin/BidModal.js
+// bid model
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -106,7 +106,6 @@ const BidModal = ({ show, onClose, bidData, nearestBid, onBidStart }) => {
         if (userUpdateResponse.status === 200) {
           onBidStart(updatedBid); // Notify parent component
           onClose(); // Close the modal
-          alert('Bid started successfully!');
         } else {
           console.error('Failed to update user:', userUpdateResponse.data.message);
           alert('Failed to update user. Please check the console for details.');
@@ -137,6 +136,9 @@ const BidModal = ({ show, onClose, bidData, nearestBid, onBidStart }) => {
     return null;
   }
 
+  // Filter out users who have won previous bids
+  const eligibleUsers = bidData.users.filter(user => !user.BidWinNo);
+
   return (
     <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog" aria-modal="true">
       <div className="modal-dialog modal-dialog-centered" role="document">
@@ -163,7 +165,7 @@ const BidModal = ({ show, onClose, bidData, nearestBid, onBidStart }) => {
                   required
                 >
                   <option value="">Select Winner</option>
-                  {bidData.users.map((user) => (
+                  {eligibleUsers.map((user) => (
                     <option key={user._id} value={user._id}>
                       {user.userName} - {user.userPhoneNo}
                     </option>
