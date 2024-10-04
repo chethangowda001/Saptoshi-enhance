@@ -9,7 +9,7 @@ const bidSchema = new Schema({
   ParticipantsCount: { type: Number, default: 0 },
   BidSize: Number,
   AD: String,
-  users: [
+  users: [           
     {
       participantId: {
         type: Schema.Types.ObjectId,
@@ -40,7 +40,7 @@ const bidSchema = new Schema({
       PaymentStatus: [
         {
           u_id: { type: Schema.Types.ObjectId, ref: 'users' },
-          userName: { type: String, ref: 'users'},
+          userName: { type: String, ref: 'Participant'},
           payment: Number,
           payed: Boolean,
         }
@@ -59,26 +59,32 @@ const bidSchema = new Schema({
   ],
 });
 
+
+bidSchema.virtual('profit').get(function() {
+  const bidSize = typeof this.BidSize === 'number' ? this.BidSize : 0;
+  const monthDuration = typeof this.MonthDuration === 'number' ? this.MonthDuration : 0;
+  const bidPayOut = typeof this.BidPayOut === 'number' ? this.BidPayOut : 0;
+  
+  const bidManagementAccount = Array.isArray(this.BidManagementAccount) ? this.BidManagementAccount : [];
+  const totalManagementDebit = bidManagementAccount.reduce((acc, account) => {
+    const managementDebit = typeof account.ManagementDebit === 'number' ? account.ManagementDebit : 0;
+    return acc + managementDebit;
+  }, 0);
+  
+  const totalRevenue = bidSize * monthDuration;
+  const totalExpenses = bidPayOut + totalManagementDebit;
+  const profit = totalRevenue - totalExpenses;
+  
+  return profit;
+});
+
+// Enable virtual fields in toJSON and toObject
+bidSchema.set('toJSON', { virtuals: true });
+bidSchema.set('toObject', { virtuals: true });
+
 module.exports = mongoose.model('Bids', bidSchema); 
 
-// bidSchema.virtual('profit').get(function() {
-//   const bidSize = typeof this.BidSize === 'number' ? this.BidSize : 0;
-//   const monthDuration = typeof this.MonthDuration === 'number' ? this.MonthDuration : 0;
-//   const bidPayOut = typeof this.BidPayOut === 'number' ? this.BidPayOut : 0;
-//   const bidManagementAccount = Array.isArray(this.BidManagementAccount) ? this.BidManagementAccount : [];
-//   const totalManagementDebit = bidManagementAccount.reduce((acc, account) => {
-//     const managementDebit = typeof account.ManagementDebit === 'number' ? account.ManagementDebit : 0;
-//     return acc + managementDebit;
-//   }, 0);
-//   const totalRevenue = bidSize * monthDuration;
-//   const totalExpenses = bidPayOut + totalManagementDebit;
-//   return totalRevenue - totalExpenses;
-// });
 
-
-// // Enable virtual fields in toJSON and toObject
-// bidSchema.set('toJSON', { virtuals: true });
-// bidSchema.set('toObject', { virtuals: true });
 
 
 

@@ -376,61 +376,194 @@ exports.getProfit = async (req, res) => {
 };
 
 
-// controllers/bidsController.js
 
 
 
-// Controller to mark a user as paid
-exports.markUserAsPaid = async (req, res) => {
-  const { participantId, bidId, bidNo } = req.body;
 
-  // Validate required fields
-  if (!participantId || !bidId || !bidNo) {
-    return res.status(400).json({ message: 'participantId, bidId, and bidNo are required' });
-  }
+
+// API to update payment status and delete the payment due entry
+exports.updatePaymentStatusAndRemoveDue = async function(req, res) {
+  const { bidId, userId } = req.params; // userId corresponds to user_Id in Payment schema
+  const { bidNo, payed } = req.body;    // Get bid number and payment status (true/false)
 
   try {
-    // Step 1: Remove the corresponding PaymentDue document
-    const deletedPayment = await Payment.deleteOne({
-      userId: participantId,
-      bidId: bidId,
-      bidNo: bidNo,
-    });
-
-    if (deletedPayment.deletedCount === 0) {
-      return res.status(404).json({ message: 'Payment due record not found' });
-    }
-
-    // Step 2: Update the Bids schema's PaymentStatus to set 'payed' to true
-    const updateResult = await Bids.updateOne(
-      {
-        _id: bidId,
-        'Bids.BidNo': bidNo,
-        'Bids.PaymentStatus.u_id': participantId,
+   
+    const bid = await Bids.findOneAndUpdate(
+      { 
+        _id: bidId, 
+        "Bids.BidNo": bidNo,
+        "Bids.PaymentStatus.u_id": userId 
       },
-      {
-        $set: {
-          'Bids.$.PaymentStatus.$[elem].payed': true,
-        },
+      { 
+        $set: { "Bids.$[bid].PaymentStatus.$[user].payed": payed } 
       },
-      {
+      { 
+        new: true, 
         arrayFilters: [
-          { 'elem.u_id': participantId },
-        ],
+          { "bid.BidNo": bidNo },    // Ensure correct bid number
+          { "user.u_id": userId }     // Ensure correct user ID
+        ]
       }
     );
 
-    if (updateResult.nModified === 0) {
-      return res.status(404).json({ message: 'Bid or PaymentStatus not found for the user' });
+    // If bid or user is not found, return 404
+    if (!bid) {
+      return res.status(404).send({ message: "Bid or user not found" });
     }
 
-    res.status(200).json({ message: 'User payment updated successfully' });
+    // Delete the corresponding entry in the Payment model for the user
+    const paymentDeleted = await Payment.findOneAndDelete({
+      user_Id: userId,  // Find by user_Id in Payment model
+      bidId: bidId      // Ensure it's the correct bid
+    });
+
+    // If the payment due entry was not found, return 404
+    if (!paymentDeleted) {
+      return res.status(404).send({ message: "Payment due entry not found" });
+    }
+
+    // Return the updated bid information after payment status change and payment due deletion
+    res.status(200).send({ message: "Payment status updated and payment due entry removed", bid });
 
   } catch (error) {
-    console.error('Error marking user as paid:', error);
-    res.status(500).json({ message: 'Failed to mark user as paid' });
+    // Handle internal errors
+    res.status(500).send({ message: "Internal server error", error: error.message });
   }
 };
 
 
 
+
+// controllers/bidsController.js
+
+// const Bids = require('../models/Bids'); // Adjust the path as necessary
+// const Payment = require('../models/Payment'); // Model name is 'Payment'
+
+// exports.markUserAsPaid = async (req, res) => {
+//   const { participantId, bidId, bidNo } = req.body;
+//   console.log("requested data", req.body);
+  
+//   // Validate required fields
+//   if (!participantId || !bidId || !bidNo) {
+//     return res.status(400).json({ message: 'participantId, bidId, and bidNo are required' });
+//   }
+
+//   try {
+//     // Step 1: Remove the corresponding PaymentDue document
+//     const deletedPayment = await Payment.deleteOne({
+//       userId: participantId,
+//       bidId: bidId,
+//       bidNo: bidNo,
+//     });
+//     console.log("deletedPayment data", deletedPayment);
+
+//     if (deletedPayment.deletedCount === 0) {
+//       return res.status(404).json({ message: 'Payment due record not found' });
+//     }
+
+//     // Step 2: Update the Bids schema's PaymentStatus to set 'payed' to true
+//     const updateResult = await Bids.findOneAndUpdate(
+//       { 
+//         _id: bidId, 
+//         "Bids.BidNo": bidNo,
+//         "Bids.PaymentStatus.u_id": participantId 
+//       },
+//       { 
+//         $set: { "Bids.$[bid].PaymentStatus.$[user].payed": true } 
+//       },
+//       { 
+//         new: true, 
+//         arrayFilters: [
+//           { "bid.BidNo": bidNo },
+//           { "user.u_id": participantId }
+//         ]
+//       }
+//     );
+
+//     if (!updateResult) {
+//       return res.status(404).json({ message: 'Bid or PaymentStatus not found for the user' });
+//     }
+
+//     res.status(200).json({ message: 'User payment updated successfully' });
+
+//   } catch (error) {
+//     console.error('Error marking user as paid:', error);
+//     res.status(500).json({ message: 'Failed to mark user as paid' });
+//   }
+// };
+
+
+
+
+
+exports.removeParticipants = async (req, res) => {
+  const { id } = req.params; // Bid ID
+  const { participantId } = req.body; // Participant ID passed in the request body
+  
+  try {
+    // Check if participantId is provided
+    if (!participantId) {
+      return res.status(400).json({ error: 'Participant ID is required' });
+    }
+
+    // Check if the provided participantId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(participantId)) {
+      return res.status(400).json({ error: 'Invalid participant ID format' });
+    }
+
+    // Find the bid by its ID and remove the participant from the `users` array
+    const bid = await Bids.findByIdAndUpdate(
+      id,
+      {
+        $pull: {
+          users: { participantId: new mongoose.Types.ObjectId(participantId) }, // Use `new` when creating ObjectId
+        },
+        $inc: { ParticipantsCount: -1 }, // Decrease the participants count
+      },
+      { new: true } // Return the updated document
+    );
+
+    if (!bid) {
+      return res.status(404).json({ error: 'Bid not found' });
+    }
+
+    // Success response
+    res.status(200).json({ message: 'Participant removed successfully', bid });
+  } catch (error) {
+    console.error('Error removing participant:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+
+exports.getBidProfit = async (req, res) => {
+  const { bidId } = req.params;
+
+  try {
+    // Find the bid by its ID
+    const bid = await Bids.findById(bidId);
+
+    if (!bid) {
+      return res.status(404).json({ message: 'Bid not found' });
+    }
+
+    // Calculate the profit using the virtual field
+    const profit = bid.profit;
+
+    // Send the profit as the response
+    res.status(200).json({ profit });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+exports.getAllBid = async (req, res) => {
+  try {
+    const bids = await Bids.find();
+    res.status(200).json(bids);
+  } catch (error) {
+    console.error('Error fetching bids:', error);  // Logs the actual error in the server logs for debugging
+    res.status(500).json({ message: `Internal server error: ${error.message}` });
+  }
+};

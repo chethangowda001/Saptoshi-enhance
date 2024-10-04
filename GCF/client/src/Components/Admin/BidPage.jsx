@@ -17,6 +17,28 @@ const BidPage = () => {
   const [bidClosed, setBidClosed] = useState(true);
   const [error, setError] = useState(null);
 
+
+
+  const handleDeleteUser = async (participantId) => {
+    try {
+        console.log(`Deleting participant ID: ${participantId} from bid ID: ${id}`);
+        const response = await axios.delete(`http://localhost:3001/bids/${id}/participants`, {
+            data: { participantId }, // This should contain the participantId
+        });
+
+        if (response.status === 200) {
+            toast.success('Participant removed successfully!');
+            await fetchBidData(); // Refresh the bid data after deletion
+        } else {
+            toast.error('Failed to remove participant.');
+        }
+    } catch (error) {
+        console.error('Error removing participant:', error);
+        toast.error('Failed to remove participant.');
+    }
+};
+
+
   const fetchBidData = useCallback(async () => {
     try {
       console.log(`Fetching bid data for ID: ${id}`);
@@ -158,6 +180,7 @@ const BidPage = () => {
             userName: user.userName,
             userPhoneNo: user.userPhoneNo,
             bidId: bidData._id.toString(),
+            user_Id: user._id,
             payment: 0,
             bidNo: nearestBid.BidNo,
             bidDate: nearestBid.BidDate,
@@ -333,50 +356,61 @@ const BidPage = () => {
                   </th>
                 ))}
                 <th>Paid</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {sortedUsers.length > 0 ? (
-                sortedUsers.map((user, index) => {
-                  const paymentInfo = nearestBid ? getPaymentStatus(user._id, nearestBid.BidNo) : { payment: '-', payed: false };
-                  return (
-                    <tr key={user._id}>
-                      <td>{index + 1}</td>
-                      <td>{user.userName}</td>
-                      <td>{user.BidWinNo || '-'}</td>
-                      <td>{user.BidValue || '-'}</td>
-                      <td>{user.BidPayOut || '-'}</td>
-                      {[...Array(bidData.MonthDuration)].map((_, monthIndex) => (
-                        <td key={monthIndex + 1}>
-                          {bidData.Bids[monthIndex] && bidData.Bids[monthIndex].PaymentStatus.find(status => status.u_id === user._id)?.payment || '-'}
-                        </td>
-                      ))}
-                      <td>
-                        <div className="form-check">
-                          <input
-                            type="checkbox"
-                            className="form-check-input"
-                            checked={paymentInfo.payed}
-                            onChange={() => handlePaymentToggle(user._id)}
-                            disabled={!nearestBid || nearestBid.BidClose}
-                            id={`payment-checkbox-${user._id}`}
-                          />
-                          <label htmlFor={`payment-checkbox-${user._id}`} className="form-check-label">
-                            {paymentInfo.payed ? 'Paid' : 'Unpaid'}
-                          </label>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan="8" className="text-center">
-                    No ongoing bids found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
+  {sortedUsers.length > 0 ? (
+    sortedUsers.map((user, index) => {
+      const paymentInfo = nearestBid ? getPaymentStatus(user._id, nearestBid.BidNo) : { payment: '-', payed: false };
+      return (
+        <tr key={user._id}>
+          <td>{index + 1}</td>
+          <td>{user.userName}</td>
+          <td>{user.BidWinNo || '-'}</td>
+          <td>{user.BidValue || '-'}</td>
+          <td>{user.BidPayOut || '-'}</td>
+          {[...Array(bidData.MonthDuration)].map((_, monthIndex) => (
+            <td key={monthIndex + 1}>
+              {bidData.Bids[monthIndex] && bidData.Bids[monthIndex].PaymentStatus.find(status => status.u_id === user._id)?.payment || '-'}
+            </td>
+          ))}
+          <td>
+            <div className="form-check">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                checked={paymentInfo.payed}
+                onChange={() => handlePaymentToggle(user._id)}
+                disabled={!nearestBid || nearestBid.BidClose}
+                id={`payment-checkbox-${user._id}`}
+              />
+              <label htmlFor={`payment-checkbox-${user._id}`} className="form-check-label">
+                {paymentInfo.payed ? 'Paid' : 'Unpaid'}
+              </label>
+            </div>
+          </td>
+          {/* Delete User Button */}
+          <td>
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={() => handleDeleteUser(user.participantId)}
+            >
+              Delete
+            </button>
+          </td>
+        </tr>
+      );
+    })
+  ) : (
+    <tr>
+      <td colSpan="8" className="text-center">
+        No ongoing bids found.
+      </td>
+    </tr>
+  )}
+</tbody>
+
           </table>
         </div>
       </div>

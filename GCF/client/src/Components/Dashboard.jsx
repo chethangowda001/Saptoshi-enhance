@@ -1,4 +1,4 @@
-// src/Components/Dashboard.js
+// src/Components/Dashboard.jsx
 
 import React from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
@@ -34,14 +34,15 @@ import OngoingBids from './Admin/OngoingBids';
 import BidArchive from './Admin/BidArchive';
 import BidParticipants from './Admin/BidParticipants';
 import Payments from './Admin/PaymentDueUsers';
-import Register from './Admin/Register';
+// import Register from './Admin/Register';
 import ProfitLoss from './Admin/ProfitLoss';
 import NewBid from './Admin/NewBid';
 import BidPage from './Admin/BidPage';
 import AddUser from './Admin/AddUser';
 import RegisteredUsers from './Admin/RegisteredUsers';
-// import ProfitSummary from './Admin/ProfitSummary'; // Uncomment if needed
-import PaymentStatus from './Admin/PaymentStatus'; // Assuming you have this component
+import ProfitDashboard from './Admin/ProfitDashboard';
+import SelectBidForProfit from './Admin/SelectBidForProfit';
+import PaymentStatus from './Admin/PaymentStatus'; // Ensure you have this component
 
 const drawerWidth = 240;
 
@@ -71,7 +72,7 @@ const Dashboard = () => {
     { text: 'Registered Users', icon: <PeopleIcon />, path: '/dashboard/registeredusers' },
     { text: 'New Bid', icon: <AddCircleIcon />, path: '/dashboard/newbid' },
     { text: 'Create User', icon: <PersonAddIcon />, path: '/dashboard/adduser' },
-    { text: 'Profit Summary', icon: <SummarizeIcon />, path: '/dashboard/profitsummary' },
+    { text: 'Select Bid for Profit', icon: <SummarizeIcon />, path: '/dashboard/select-bid' },
   ];
 
   const drawer = (
@@ -87,7 +88,7 @@ const Dashboard = () => {
           <ListItem
             button
             key={item.text}
-            selected={location.pathname === item.path}
+            selected={location.pathname.startsWith(item.path)}
             onClick={() => {
               navigate(item.path);
               if (isMobile) setMobileOpen(false); // Close drawer on mobile after navigation
@@ -134,7 +135,7 @@ const Dashboard = () => {
             </IconButton>
           )}
           <Typography variant="h6" noWrap component="div">
-            {menuItems.find((item) => item.path === location.pathname)?.text || 'Dashboard'}
+            {menuItems.find((item) => location.pathname.startsWith(item.path))?.text || 'Dashboard'}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -181,12 +182,13 @@ const Dashboard = () => {
           <Route path="registeredusers" element={<RegisteredUsers />} />
           <Route path="newbid" element={<NewBid />} />
           <Route path="adduser" element={<AddUser />} />
-          {/* <Route path="profitsummary" element={<ProfitSummary />} />  */}
+          <Route path="select-bid" element={<SelectBidForProfit />} />
+          <Route path="profitdashboard/:bidId" element={<ProfitDashboard />} />
           <Route path="bid/:id" element={<BidPage />} />
-          <Route path="payment-status/:id" element={<PaymentStatus />} /> {/* Ensure PaymentStatus is defined */}
+          <Route path="payment-status/:bidId" element={<PaymentStatus />} /> {/* Ensure PaymentStatus is defined */}
 
           {/* Catch-all for undefined nested routes */}
-          <Route path="*" element={<Navigate to="ongoingbids" replace />} />
+          {/* <Route path="*" element={<Navigate to="ongoingbids" replace />} /> */}
         </Routes>
       </Box>
     </Box>

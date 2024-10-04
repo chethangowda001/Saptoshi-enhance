@@ -4,7 +4,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const paymentDueSchema = new Schema({
-    userId: { type: Schema.Types.ObjectId, ref: 'Participant' }, // Assuming 'Participant' is the correct ref
+    userId: { type: Schema.Types.ObjectId, ref: 'Participant' }, 
+    user_Id : { type: Schema.Types.ObjectId, ref: "users"  },
     useerName: String,
     userPhoneNo: String,
     bidId: { type: Schema.Types.ObjectId, ref: 'Bids' }, // Reference to the bid
@@ -17,8 +18,6 @@ const paymentDueSchema = new Schema({
     },
 });
 
-// Optional: Rename 'payementDue' to 'paymentDue' for consistency
-// This would require updating all related code
-// For now, we'll proceed with the existing field name
+
 
 module.exports = mongoose.model('Payment', paymentDueSchema);

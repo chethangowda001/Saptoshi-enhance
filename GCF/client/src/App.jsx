@@ -1,5 +1,6 @@
-// src/App.js
+// src/App.jsx
 
+// 1. Static Imports at the Top
 import React, { useState, useMemo, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
@@ -8,7 +9,11 @@ import { Switch, FormControlLabel } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Lazy-loaded components
+// Static Imports
+import SelectBidForProfit from './Components/Admin/SelectBidForProfit';
+import ProfitDashboard from './Components/Admin/ProfitDashboard';
+
+// 2. Dynamic Imports (Lazy-Loaded Components)
 const Header = lazy(() => import('./Components/Header'));
 const Login = lazy(() => import('./Components/Login'));
 const SignUp = lazy(() => import('./Components/SignUp'));
@@ -42,17 +47,19 @@ const App = () => {
 
   return (
     <BrowserRouter>
-     <ToastContainer 
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
+      {/* Single ToastContainer for Notifications */}
+      <ToastContainer 
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
       <ThemeProvider theme={theme}>
         {/* Header Component */}
         <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}><CircularProgress /></div>}>
@@ -74,9 +81,6 @@ const App = () => {
           />
         </div>
 
-        {/* Toast Notifications */}
-        <ToastContainer />
-
         {/* Define Routes wrapped in Suspense */}
         <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}><CircularProgress /></div>}>
           <Routes>
@@ -92,6 +96,8 @@ const App = () => {
             <Route path="/bidder-details/:bidId" element={<BidderDetails />} />
             <Route path="/participant-details/:id" element={<ParticipantDetails />} />
             <Route path="/dashboard/payment-status/:bidId" element={<PaymentStatus />} />
+            <Route path="/dashboard/select-bid" element={<SelectBidForProfit />} />
+            <Route path="/dashboard/profitdashboard/:bidId" element={<ProfitDashboard />} />
 
             {/* Bid-related routes */}
             {/* <Route path="/bids/summary" element={<BidsSummary />} />

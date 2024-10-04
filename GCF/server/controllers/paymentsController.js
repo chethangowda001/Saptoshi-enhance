@@ -36,7 +36,7 @@ exports.updatePaymentDue = async (req, res) => {
 
   try {
     const paymentPromises = unpaidUsers.map(async (user) => {
-      const { participantId, userName, userPhoneNo, bidId, bidNo, bidDate, payment } = user;
+      const { participantId, userName, userPhoneNo, bidId, bidNo, bidDate, payment , user_Id} = user;
 
       // Validate required fields
       if (!participantId || !userName || !userPhoneNo || !bidId || !bidNo || !bidDate) {
@@ -47,6 +47,7 @@ exports.updatePaymentDue = async (req, res) => {
       // Create a new Payment document
       const newPayment = new PaymentDue({
         userId: participantId,
+        user_Id: user_Id,
         useerName: userName,
         userPhoneNo: userPhoneNo,
         bidId: bidId,
